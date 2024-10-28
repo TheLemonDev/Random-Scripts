@@ -13,6 +13,10 @@ client = openai.OpenAI(
     api_key=os.getenv("GPT_API_KEY")
 )
 
+roles = (
+    "You are a helpful assistant"
+)
+
 recogniser = sr.Recognizer()
 
 def get_request(prompt: str, max_tokens: int, role: str):
@@ -45,12 +49,15 @@ def speech_to_string(sensitivity_adjustment_duration: int):
             audio_data = sr.AudioData(audio_data.frame_data + segment.frame_data, segment.sample_rate, segment.sample_width)
         
         os.system('cls')
-        print("Regognising...")
+        print("Recognising...")
 
         try:
             string = recogniser.recognize_google(audio_data)
             os.system('cls')
             print(f"RECOGNISED!: {string}")
+            gpt_response = get_request(prompt=string, max_tokens=1000, role=roles[0])
+            print(f"GPT RESPONSE: {gpt_response}")
+            string_to_speech(gpt_response)
             
         except sr.UnknownValueError:
             os.system('cls')
@@ -59,6 +66,14 @@ def speech_to_string(sensitivity_adjustment_duration: int):
         except sr.RequestError:
             os.system('cls')
             print("OH NO SOMETHING BAD HAPPENED TO THE RECOGNISER RUN FOR YOUR LIFE")
+
+def string_to_speech(string: str):
+    try:
+        voice = gtts.gTTS(text=string, lang="en", slow=False)
+        voice.save('voice.mp3')
+    
+    except:
+        print("TTS error!")
 
 while True:
     if keyboard.is_pressed(listen_keybind):
