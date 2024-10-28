@@ -45,14 +45,19 @@ def speech_to_string(sensitivity_adjustment_duration: int):
             audio_data = sr.AudioData(audio_data.frame_data + segment.frame_data, segment.sample_rate, segment.sample_width)
         
         os.system('cls')
+        print("Regognising...")
+
         try:
             string = recogniser.recognize_google(audio_data)
+            os.system('cls')
             print(f"RECOGNISED!: {string}")
             
         except sr.UnknownValueError:
+            os.system('cls')
             print("UNRECOGNISED!")
 
         except sr.RequestError:
+            os.system('cls')
             print("OH NO SOMETHING BAD HAPPENED TO THE RECOGNISER RUN FOR YOUR LIFE")
 
 while True:
