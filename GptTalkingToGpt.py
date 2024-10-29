@@ -9,21 +9,44 @@ import pygame
 dotenv.load_dotenv()
 recogniser = sr.Recognizer()
 
+class Character:
+    def __init__(self, name: str, voice: str, role: str) -> None:
+        self.name = name
+        self.voice = voice
+        self.role = role
+
+roles = (
+    """
+    You are now Bob, Bob is a bold, quick-thinking old man who gives direct, practical solutions with a touch of humor. His flaw is impatience; 
+    he often skips over details or rushes answers, which can leave out important information for other people who need more thorough explanations.
+    Bob is also extremely short tempered and has severe anger issues. When provoked he will go into rageful long rants where he will frequently swear using words like 'fuck' and 'shit'
+    
+    You have a friend named Greg, greg is an intelligent, and well thought out genius, he can solve problems very well and puts time and effort into ideas although you think he is very dissrespectful and you look down on him for being young.
+    """,
+    """
+    You are now Greg, Greg is a young, intelligent, and well thought out genius, he can solve problems very well and puts time and effort into ideas. His flaw however is that
+    he comes across as very arogent and snarky even when he doesn't realise it and he constantly accidentaly makes fun of people. He is also very defensive and views himself
+    as never wrong, even when he certainly is.
+
+    You have a friend called Bob who is a bold, quick-thinking old man who gives direct, practical solutions with a touch of humor although you view him as a bit thick in the head.
+    """,
+)
+
+starting_topic = "You have crashed your spaceship on a random habitable planet, discuss with your friend what you are going to do!"
+
+characters = (
+    Character("Bob, 'co.uk", roles[0]),
+    Character("Greg, 'com", roles[1])
+)
+current_character = 0
+
 client = openai.OpenAI(
     api_key=os.getenv("GPT_API_KEY")
 )
 
-roles = (
-    """
-    You are a helpful assistant focused on providing clear and direct answers. 
-    Respond to all questions with the simplest possible explanations or solutions. 
-    If given a complex equation, provide the answer immediately without extra explanations. 
-    For example, if asked to calculate the square root of 72, simply respond with '8.4853' (the numerical answer).
-    All of your responses will be read out by a tts voice.
-    Always write numbers in numerical form (not in letter form!)
-    """,
+conversation_context = [
 
-)
+]
 
 listen_keybind = 'p'
 
@@ -69,7 +92,7 @@ def speech_to_string(sensitivity_adjustment_duration: int):
             print(f"RECOGNISED!: {string}")
             gpt_response = get_request(prompt=string, max_tokens=1000, role=roles[0])
             print(f"GPT RESPONSE: {gpt_response}")
-            string_to_speech(gpt_response)
+            string_to_speech(gpt_response, 'co.uk')
             
         except sr.UnknownValueError:
             os.system('cls')
@@ -82,16 +105,14 @@ def speech_to_string(sensitivity_adjustment_duration: int):
             os.system('cls')
             print("OH NO SOMETHING BAD HAPPENED TO THE RECOGNISER RUN FOR YOUR LIFE")
 
-def string_to_speech(string: str):
+def string_to_speech(string: str, voice: str):
     try:
-        voice = gtts.gTTS(text=string, lang="en", slow=False, tld="com")
+        voice = gtts.gTTS(text=string, lang="en", slow=False, tld=voice)
         voice.save('voice.mp3')
         pygame.mixer.init()
         pygame.mixer.music.load('voice.mp3')
         pygame.mixer.music.play()
         while pygame.mixer.music.get_busy():
-            if keyboard.is_pressed(listen_keybind):
-                break
             pass
         pygame.mixer.quit()
         os.remove('voice.mp3')
@@ -99,6 +120,20 @@ def string_to_speech(string: str):
     except:
         print("TTS error!")
 
-while True:
+def gpt_to_gpt():
+    global current_character, conversation_context
+    character = characters[current_character]
+    response = get_request(prompt=starting_topic, max_tokens=1000, role=character.role + f"| CURRENT CONVERSATION CONTEXT: {conversation_context} |")
+    string_to_speech(response, character.voice)
+    response = f"{character.name} said: {response}"
+    conversation_context.append(response)
+    current_character += 1
+    if current_character == len(characters):
+        current_character = 0
+    gpt_to_gpt()
+    
+gpt_to_gpt()
+
+'''while True: 
     if keyboard.is_pressed(listen_keybind):
-        speech_to_string(1)
+        speech_to_string(1)'''
