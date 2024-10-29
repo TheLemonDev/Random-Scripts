@@ -20,6 +20,7 @@ roles = (
     If given a complex equation, provide the answer immediately without extra explanations. 
     For example, if asked to calculate the square root of 72, simply respond with '8.4853' (the numerical answer).
     All of your responses will be read out by a tts voice.
+    Always write numbers in numerical form (not in letter form!)
     """,
 
 )
@@ -83,7 +84,7 @@ def speech_to_string(sensitivity_adjustment_duration: int):
 
 def string_to_speech(string: str):
     try:
-        voice = gtts.gTTS(text=string, lang="en", slow=False, tld="co.uk")
+        voice = gtts.gTTS(text=string, lang="en", slow=False, tld="com")
         voice.save('voice.mp3')
         pygame.mixer.init()
         pygame.mixer.music.load('voice.mp3')
