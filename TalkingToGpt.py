@@ -4,6 +4,7 @@ import openai
 import keyboard
 import dotenv
 import os
+import pygame
 
 listen_keybind = 'p'
 
@@ -69,13 +70,18 @@ def speech_to_string(sensitivity_adjustment_duration: int):
 
 def string_to_speech(string: str):
     try:
-        voice = gtts.gTTS(text=string, lang="en", slow=False)
+        voice = gtts.gTTS(text=string, lang="en", slow=False, tld="co.uk")
         voice.save('voice.mp3')
+        pygame.mixer.init()
+        pygame.mixer.music.load("voice.mp3")
+        pygame.mixer.music.play()
+        while pygame.mixer.music.get_busy():
+            pass
     
     except:
         print("TTS error!")
 
+
 while True:
     if keyboard.is_pressed(listen_keybind):
         speech_to_string(1)
-
