@@ -45,9 +45,13 @@ def speech_to_string(sensitivity_adjustment_duration: int):
         recogniser.adjust_for_ambient_noise(source=source, duration=sensitivity_adjustment_duration)
         os.system('cls')
         print(f"Listening... (release {listen_keybind} to stop!)")
-        while keyboard.is_pressed(listen_keybind):
-            segment = recogniser.listen(source=source)
-            audio_data = sr.AudioData(audio_data.frame_data + segment.frame_data, segment.sample_rate, segment.sample_width)
+        while True:
+            if keyboard.is_pressed(listen_keybind):
+                print(1)
+                segment = recogniser.listen(source=source, phrase_time_limit=1)
+                audio_data = sr.AudioData(audio_data.frame_data + segment.frame_data, segment.sample_rate, segment.sample_width)
+            else:
+                break
         
         os.system('cls')
         print("Recognising...")
@@ -73,10 +77,12 @@ def string_to_speech(string: str):
         voice = gtts.gTTS(text=string, lang="en", slow=False, tld="co.uk")
         voice.save('voice.mp3')
         pygame.mixer.init()
-        pygame.mixer.music.load("voice.mp3")
+        pygame.mixer.music.load('voice.mp3')
         pygame.mixer.music.play()
         while pygame.mixer.music.get_busy():
             pass
+        pygame.mixer.quit()
+        os.remove('voice.mp3')
     
     except:
         print("TTS error!")
