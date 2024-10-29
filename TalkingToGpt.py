@@ -6,9 +6,8 @@ import dotenv
 import os
 import pygame
 
-listen_keybind = 'p'
-
 dotenv.load_dotenv()
+recogniser = sr.Recognizer()
 
 client = openai.OpenAI(
     api_key=os.getenv("GPT_API_KEY")
@@ -18,7 +17,7 @@ roles = (
     "You are a helpful assistant"
 )
 
-recogniser = sr.Recognizer()
+listen_keybind = 'p'
 
 def get_request(prompt: str, max_tokens: int, role: str):
     try:
@@ -86,7 +85,6 @@ def string_to_speech(string: str):
     
     except:
         print("TTS error!")
-
 
 while True:
     if keyboard.is_pressed(listen_keybind):
