@@ -32,11 +32,13 @@ roles = (
     """,
 )
 
+global_rules = "You must limit your responses to less than 3 sentences, what you say must drive the story forward in some way, also respond like you're having a direct conversation with your friend, don't address them at the start of your repsonse"
+
 starting_topic = "You have crashed your spaceship on a random habitable planet, discuss with your friend what you are going to do!"
 
 characters = (
-    Character("Bob, 'co.uk", roles[0]),
-    Character("Greg, 'com", roles[1])
+    Character("Bob", 'co.uk', roles[0]),
+    Character("Greg", 'com', roles[1])
 )
 current_character = 0
 
@@ -123,7 +125,9 @@ def string_to_speech(string: str, voice: str):
 def gpt_to_gpt():
     global current_character, conversation_context
     character = characters[current_character]
-    response = get_request(prompt=starting_topic, max_tokens=1000, role=character.role + f"| CURRENT CONVERSATION CONTEXT: {conversation_context} |")
+    print(f"{character.name} is thinking...")
+    response = get_request(prompt=starting_topic, max_tokens=1000, role=character.role + f"{global_rules} | CURRENT CONVERSATION CONTEXT: {conversation_context} |")
+    print(f"{character.name} says: {response}")
     string_to_speech(response, character.voice)
     response = f"{character.name} said: {response}"
     conversation_context.append(response)
