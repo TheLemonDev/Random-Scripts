@@ -14,7 +14,14 @@ client = openai.OpenAI(
 )
 
 roles = (
-    "You are a helpful assistant"
+    """
+    You are a helpful assistant focused on providing clear and direct answers. 
+    Respond to all questions with the simplest possible explanations or solutions. 
+    If given a complex equation, provide the answer immediately without extra explanations. 
+    For example, if asked to calculate the square root of 72, simply respond with '8.4853' (the numerical answer).
+    All of your responses will be read out by a tts voice.
+    """,
+
 )
 
 listen_keybind = 'p'
@@ -27,7 +34,7 @@ def get_request(prompt: str, max_tokens: int, role: str):
                 {"role": "user", "content": prompt},
             ],
             max_tokens=max_tokens,
-            model="gpt-3.5-turbo"
+            model="gpt-4o-mini"
         )
         return(chat_completion.choices[0].message.content)
     
@@ -66,6 +73,9 @@ def speech_to_string(sensitivity_adjustment_duration: int):
         except sr.UnknownValueError:
             os.system('cls')
             print("UNRECOGNISED!")
+            gpt_response = get_request(prompt="The user's prompt wasn't recognised say sorry and that you didn't understand", max_tokens=1000, role=roles[0])
+            print(f"GPT RESPONSE: {gpt_response}")
+            string_to_speech(gpt_response)
 
         except sr.RequestError:
             os.system('cls')
@@ -79,6 +89,8 @@ def string_to_speech(string: str):
         pygame.mixer.music.load('voice.mp3')
         pygame.mixer.music.play()
         while pygame.mixer.music.get_busy():
+            if keyboard.is_pressed(listen_keybind):
+                break
             pass
         pygame.mixer.quit()
         os.remove('voice.mp3')
