@@ -5,6 +5,7 @@ import keyboard
 import dotenv
 import os
 import pygame
+import time
 
 dotenv.load_dotenv()
 recogniser = sr.Recognizer()
@@ -23,7 +24,7 @@ roles = (
 	For example, if asked to calculate the settings_widget root of 72, simply respond with '8.4853' (the numerical answer).
 	All of your responses will be read out by a tts voice.
 	Always write numbers in numerical form (not in letter form!)
-    IF THE PROMPT RELATES TO CHANGING A KEYBIND ONLY RESPOND WITH 'activation key changed to {the new key (in the syntax of the keyboard libary keys)}' if no key is given 
+    IF THE PROMPT RELATES TO CHANGING A KEYBIND ONLY RESPOND WITH 'press a key'
 	""",
 )
 
@@ -52,6 +53,7 @@ def speech_to_string(sensitivity_adjustment_duration: int):
 		recogniser.adjust_for_ambient_noise(source=source, duration=sensitivity_adjustment_duration)
 		os.system('cls')
 		print(f"Listening... (release {listen_keybind} to stop!)")
+		print(f"(Say that you would like to change your keybind, to reset the activation key!)")
 		while True:
 			if keyboard.is_pressed(listen_keybind):
 				print(1)
@@ -70,6 +72,8 @@ def speech_to_string(sensitivity_adjustment_duration: int):
 			gpt_response = get_request(prompt=string, max_tokens=1000, role=roles[0])
 			print(f"GPT RESPONSE: {gpt_response}")
 			string_to_speech(gpt_response)
+			if gpt_response == "press a key":
+				change_keybind()
 			
 		except sr.UnknownValueError:
 			os.system('cls')
@@ -84,13 +88,11 @@ def speech_to_string(sensitivity_adjustment_duration: int):
 
 def string_to_speech(string: str):
     try:
-        global listening
         voice = gtts.gTTS(text=string, lang="en", slow=False, tld="com")
         voice.save('voice.mp3')
         pygame.mixer.init()
         pygame.mixer.music.load('voice.mp3')
         pygame.mixer.music.play()
-        listening = False
         while pygame.mixer.music.get_busy():
             if keyboard.is_pressed(listen_keybind):
                 break
@@ -101,11 +103,29 @@ def string_to_speech(string: str):
     except:
     	print("TTS error!")
 
-def listen_for_key():
-    global listening
+def change_keybind():
+    global listen_keybind
+    print("Press a new key for the keybind...")
+
     while True:
-        if keyboard.is_pressed(listen_keybind) and not listening:
-            speech_to_string(1)
-            listening = True
+        event = keyboard.read_event()
+        if event.event_type == keyboard.KEY_DOWN:
+            print(f"New keybind set to '{event.name }'")
+            listen_keybind = event.name
+            time.sleep(0.5)
+            break
+
+
+def listen_for_key():
+	global listening
+	os.system('cls')
+	print(f"Press {listen_keybind} to activate!")
+	while True:
+		if keyboard.is_pressed(listen_keybind) and not listening:
+			listening = True
+			speech_to_string(1)
+			listening = False
+			os.system('cls')
+			print(f"Press {listen_keybind} to activate!")
 
 listen_for_key()
