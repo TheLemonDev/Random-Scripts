@@ -5,9 +5,11 @@ import keyboard
 import dotenv
 import os
 import pygame
+import threading
 
 dotenv.load_dotenv()
 recogniser = sr.Recognizer()
+listening = False
 
 client = openai.OpenAI(
 	api_key=os.getenv("GPT_API_KEY")
@@ -82,25 +84,30 @@ def speech_to_string(sensitivity_adjustment_duration: int):
 			print("OH NO SOMETHING BAD HAPPENED TO THE RECOGNISER RUN FOR YOUR LIFE")
 
 def string_to_speech(string: str):
-	try:
-		voice = gtts.gTTS(text=string, lang="en", slow=False, tld="com")
-		voice.save('voice.mp3')
-		pygame.mixer.init()
-		pygame.mixer.music.load('voice.mp3')
-		pygame.mixer.music.play()
-		while pygame.mixer.music.get_busy():
-			if keyboard.is_pressed(listen_keybind):
-				break
-			pass
-		pygame.mixer.quit()
-		os.remove('voice.mp3')
-	
-	except:
-		print("TTS error!")
+    try:
+        global listening
+        voice = gtts.gTTS(text=string, lang="en", slow=False, tld="com")
+        voice.save('voice.mp3')
+        pygame.mixer.init()
+        pygame.mixer.music.load('voice.mp3')
+        pygame.mixer.music.play()
+        listening = False
+        while pygame.mixer.music.get_busy():
+            if keyboard.is_pressed(listen_keybind):
+                break
+            pass
+        pygame.mixer.quit()
+        os.remove('voice.mp3')
+
+    except:
+    	print("TTS error!")
 
 def listen_for_key():
-	while True:
-		if keyboard.is_pressed(listen_keybind):
-			speech_to_string(1)
+    global listening
+    while True:
+        if keyboard.is_pressed(listen_keybind) and not listening:
+            speech_to_string(1)
+            listening = True
 
-listen_for_key()
+listener_thread = threading.Thread(target=listen_for_key, daemon=True)
+listener_thread.start()
