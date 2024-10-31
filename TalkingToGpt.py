@@ -24,9 +24,16 @@ roles = (
 	For example, if asked to calculate the settings_widget root of 72, simply respond with '8.4853' (the numerical answer).
 	All of your responses will be read out by a tts voice.
 	Always write numbers in numerical form (not in letter form!)
-    IF THE PROMPT RELATES TO CHANGING A KEYBIND ONLY RESPOND WITH 'press a key'
+    IF THE PROMPT RELATES TO CHANGING YOUR KEYBIND ONLY RESPOND WITH 'press a key' if they just mention keybinds and make no reference to changing it just respond normaly
+    IF THE USER EXPLICITLY ASKS TO CLEAR YOUR MEMORY ONLY RESPOND WITH 'clearing memory' if they just mention memory and make no reference to clearing it just respond normaly
+    Every prompt will also have a conversation history, it includes every prompt that has been given to you and every response you gave to said prompt.
 	""",
 )
+
+conversation_memory = [
+	
+]
+forget_range = 30
 
 def get_request(prompt: str, max_tokens: int, role: str):
 	try:
@@ -46,6 +53,7 @@ def get_request(prompt: str, max_tokens: int, role: str):
 	return None
 
 def speech_to_string(sensitivity_adjustment_duration: int):
+	global conversation_memory
 	audio_data = sr.AudioData(b"", 16000, 2)
 	with sr.Microphone() as source:
 		os.system('cls')
@@ -54,9 +62,9 @@ def speech_to_string(sensitivity_adjustment_duration: int):
 		os.system('cls')
 		print(f"Listening... (release {listen_keybind} to stop!)")
 		print(f"(Say that you would like to change your keybind, to reset the activation key!)")
+		print(f"(Say that you would like to wipe the memory to reset the AI's memory)")
 		while True:
 			if keyboard.is_pressed(listen_keybind):
-				print(1)
 				segment = recogniser.listen(source=source, phrase_time_limit=1)
 				audio_data = sr.AudioData(audio_data.frame_data + segment.frame_data, segment.sample_rate, segment.sample_width)
 			else:
@@ -69,11 +77,20 @@ def speech_to_string(sensitivity_adjustment_duration: int):
 			string = recogniser.recognize_google(audio_data)
 			os.system('cls')
 			print(f"RECOGNISED!: {string}")
-			gpt_response = get_request(prompt=string, max_tokens=1000, role=roles[0])
+			role = roles[0]
+			role = f"{role} + (PREVIOUS CONVERSATIONS): "
+			for i in conversation_memory:
+				role = f"{role} {i},"
+			gpt_response = get_request(prompt=string, max_tokens=1000, role=role)
 			print(f"GPT RESPONSE: {gpt_response}")
 			string_to_speech(gpt_response)
 			if gpt_response == "press a key":
 				change_keybind()
+			elif gpt_response == "clearing memory":
+				conversation_memory.clear()
+				print("Memory Wiped!")
+			else:
+				add_to_memory(gpt_response, string)
 			
 		except sr.UnknownValueError:
 			os.system('cls')
@@ -115,6 +132,11 @@ def change_keybind():
             time.sleep(0.5)
             break
 
+def add_to_memory(gpt_response: str, prompt: str):
+    global conversation_memory
+    conversation_memory.append(f"|User said: {prompt} and you responded with {gpt_response}|")
+    if len(conversation_memory) > forget_range:
+        conversation_memory.pop(0)
 
 def listen_for_key():
 	global listening
