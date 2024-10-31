@@ -5,11 +5,11 @@ import keyboard
 import dotenv
 import os
 import pygame
-import threading
 
 dotenv.load_dotenv()
 recogniser = sr.Recognizer()
 listening = False
+listen_keybind = 'p'
 
 client = openai.OpenAI(
 	api_key=os.getenv("GPT_API_KEY")
@@ -23,10 +23,9 @@ roles = (
 	For example, if asked to calculate the settings_widget root of 72, simply respond with '8.4853' (the numerical answer).
 	All of your responses will be read out by a tts voice.
 	Always write numbers in numerical form (not in letter form!)
+    IF THE PROMPT RELATES TO CHANGING A KEYBIND ONLY RESPOND WITH 'activation key changed to {the new key (in the syntax of the keyboard libary keys)}' if no key is given 
 	""",
 )
-
-listen_keybind = 'p'
 
 def get_request(prompt: str, max_tokens: int, role: str):
 	try:
@@ -109,5 +108,4 @@ def listen_for_key():
             speech_to_string(1)
             listening = True
 
-listener_thread = threading.Thread(target=listen_for_key, daemon=True)
-listener_thread.start()
+listen_for_key()
