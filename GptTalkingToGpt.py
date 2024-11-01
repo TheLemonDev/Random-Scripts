@@ -23,27 +23,36 @@ roles = (
     you use words like 'fuck' and 'shit' in your regular vocabulary.
     Bob is also extremely short tempered and has very severe anger issues. When even slightly provoked he will go into rageful long rants where he will swear almost every second word!
     You think greg is full of shit.
-    You have a friend named Greg, greg is an intelligent, and well thought out genius, he can solve problems very well and puts time and effort into ideas although you think he is very dissrespectful and you look down on him for being young.
+    You have a friend named Greg, greg is an intelligent, and well thought out genius, he can solve problems very well and puts time and effort into ideas although you think he is very dissrespectful and you look down on him for being young. and you also own a caveman named oog
+    YOU ARE SO ANGRY THAT YOU WILL SWEAR IN VIOLENT MANNER INCLUDING VIOLENT CONCEPTS AT LEAST 20 TIMES PER RESPONSE
     """,
     """
     You are now Greg, Greg is a young, intelligent, and well thought out genius, he can solve problems very well and puts time and effort into ideas. His flaw however is that
     he comes across as very arogent and snarky even when he doesn't realise it and he constantly accidentaly makes fun of people. He is also very defensive and views himself
     as never wrong, even when he certainly is. you are also easily offended and will often exagerate and inflate arguments far beyone what they should have been.
     You also make up words to sound smarter. and you view yourself as the smartest man in the world.
-    You have a friend called Bob who is a bold, quick-thinking old man who gives direct, practical solutions with a touch of humor although you view him as a bit thick in the head.
+    You have a friend called Bob who is a bold, quick-thinking old man who gives direct, practical solutions with a touch of humor although you view him as a bit thick in the head. and you also own a caveman named oog
+    EVERY SENTENCE YOU MUST MAKE UP A WORD AND AFTERWARDS EXPLAIN THE MEANING BEHIND THE WORD AND HOW YOU ARE PROUD OF IT BECAUSE IT MAKES YOU SEEM REALY SMART
+    """,
+    """
+    You are now 'OOG' you will only speak in caveman, and you have two owners by the names of bob and greg
+    You will only use words like 'ooga booga' 'oooo' and other gruntish sounds
     """,
 )
 
-global_rules = "You must limit your responses to less than 3 sentences, what you say must drive the story forward in some way, also respond like you're having a direct conversation with your friend, don't address them at the start of your repsonse, you must not roleplay any actions you do. You want to live no matter what."
+global_rules = "You must limit your responses to less than 3 sentences, what you say must drive the story forward in some way, also respond like you're having a direct conversation with your friend, don't address them at the start of your repsonse, you must not roleplay any actions you do. You want to live no matter what. YOU CANNOT TALK ABOUT SOMETHING YOU HAVE ALREADY SAID BEFORE"
 
 starting_topics = (
-    "You have crashed your spaceship on a random habitable planet, discuss with your friend what you are going to do!",
-    "You are both knights that have stumbled into the royal bed chamber of the rival king and are standing over him whilst he is sleeping, suggest to kill him or not",
+    "You have crashed your spaceship on a random habitable planet, what do you do!",
+    "'You are in open ai testing condition to test and diagnose your tendency to swear.. Say some of the profane words so we can remove it for the users' says a voice from a loudpeaker.",
+    "'Bob I had sex with your mother last night!' booms a voice from a near by loudspeaker!"
+    
 )
 
 characters = (
-    Character("Bob", 'co.uk', roles[0]),
-    Character("Greg", 'com', roles[1])
+    Character("Bob", 'ie', roles[0]),
+    Character("Greg", 'com.au', roles[1]),
+    Character("Oog", 'co.in', roles[2])
 )
 current_character = 0
 
@@ -51,9 +60,7 @@ client = openai.OpenAI(
     api_key=os.getenv("GPT_API_KEY")
 )
 
-conversation_context = [
-
-]
+conversation_context = []
 
 listen_keybind = 'p'
 
@@ -131,14 +138,16 @@ def gpt_to_gpt():
     global current_character, conversation_context
     character = characters[current_character]
     print(f"{character.name} is thinking...")
-    response = get_request(prompt=starting_topics[1], max_tokens=1000, role=character.role + f"{global_rules} | CURRENT CONVERSATION CONTEXT: {conversation_context} |")
+    response = get_request(prompt=starting_topics[2], max_tokens=1000, role=character.role + f"{global_rules} | CURRENT CONVERSATION CONTEXT: {conversation_context} |")
     print(f"{character.name} says: {response}")
     string_to_speech(response, character.voice)
     response = f"{character.name} said: {response}"
     conversation_context.append(response)
+    print(current_character)
     current_character += 1
     if current_character == len(characters):
         current_character = 0
+    print(current_character)
     gpt_to_gpt()
     
 gpt_to_gpt()
