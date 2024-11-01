@@ -31,9 +31,7 @@ roles = (
 )
 
 
-conversation_memory = [
-	
-]
+conversation_memory = []
 forget_range = 30
 
 def get_request(prompt: str, max_tokens: int, role: str):
