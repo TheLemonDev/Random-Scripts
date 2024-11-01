@@ -24,11 +24,12 @@ roles = (
 	For example, if asked to calculate the settings_widget root of 72, simply respond with '8.4853' (the numerical answer).
 	All of your responses will be read out by a tts voice.
 	Always write numbers in numerical form (not in letter form!)
-    IF THE PROMPT RELATES TO CHANGING YOUR KEYBIND ONLY RESPOND WITH 'press a key' if they just mention keybinds and make no reference to changing it just respond normaly
+    IF THE PROMPT EXPLICITLY ASKS TO CHANGE YOUR KEYBIND ONLY RESPOND WITH 'press a key' if they just mention keybinds and make no reference to changing it just respond normaly
     IF THE USER EXPLICITLY ASKS TO CLEAR YOUR MEMORY ONLY RESPOND WITH 'clearing memory' if they just mention memory and make no reference to clearing it just respond normaly
     Every prompt will also have a conversation history, it includes every prompt that has been given to you and every response you gave to said prompt.
 	""",
 )
+
 
 conversation_memory = [
 	
@@ -59,6 +60,7 @@ def speech_to_string(sensitivity_adjustment_duration: int):
 		os.system('cls')
 		print("Adjusting for ambient sound...")
 		recogniser.adjust_for_ambient_noise(source=source, duration=sensitivity_adjustment_duration)
+
 		os.system('cls')
 		print(f"Listening... (release {listen_keybind} to stop!)")
 		print(f"(Say that you would like to change your keybind, to reset the activation key!)")
@@ -89,6 +91,7 @@ def speech_to_string(sensitivity_adjustment_duration: int):
 			elif gpt_response == "clearing memory":
 				conversation_memory.clear()
 				print("Memory Wiped!")
+				string_to_speech("Memory Wiped!")
 			else:
 				add_to_memory(gpt_response, string)
 			
@@ -107,6 +110,7 @@ def string_to_speech(string: str):
     try:
         voice = gtts.gTTS(text=string, lang="en", slow=False, tld="com")
         voice.save('voice.mp3')
+        pygame.mixer.quit()
         pygame.mixer.init()
         pygame.mixer.music.load('voice.mp3')
         pygame.mixer.music.play()
@@ -129,6 +133,7 @@ def change_keybind():
         if event.event_type == keyboard.KEY_DOWN:
             print(f"New keybind set to '{event.name }'")
             listen_keybind = event.name
+            string_to_speech(f"New keybind set to '{event.name }'")
             time.sleep(0.5)
             break
 
@@ -141,6 +146,7 @@ def add_to_memory(gpt_response: str, prompt: str):
 def listen_for_key():
 	global listening
 	os.system('cls')
+	print(f"~CHAT GPT TTS BOT~")
 	print(f"Press {listen_keybind} to activate!")
 	while True:
 		if keyboard.is_pressed(listen_keybind) and not listening:
@@ -148,6 +154,7 @@ def listen_for_key():
 			speech_to_string(1)
 			listening = False
 			os.system('cls')
+			print(f"~CHAT GPT TTS BOT~")
 			print(f"Press {listen_keybind} to activate!")
 
 listen_for_key()
