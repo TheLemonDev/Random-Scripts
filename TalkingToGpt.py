@@ -26,10 +26,10 @@ roles = (
 	Always write numbers in numerical form (not in letter form!)
     IF THE PROMPT EXPLICITLY ASKS TO CHANGE YOUR KEYBIND ONLY RESPOND WITH 'press a key' if they just mention keybinds and make no reference to changing it just respond normaly
     IF THE USER EXPLICITLY ASKS TO CLEAR YOUR MEMORY ONLY RESPOND WITH 'clearing memory' if they just mention memory and make no reference to clearing it just respond normaly
+    IF THE USER EXPLICITLY ASKS TO CHANGE YOUR VOLUME ONLY RESPOND WITH ''volumeset' to (and the number they want to set it to in numerical form)' if the volume the user wants to set it to exceeds 10 or is lower than 0 say that you can't set the volume to that number
     Every prompt will also have a conversation history, it includes every prompt that has been given to you and every response you gave to said prompt.
 	""",
 )
-
 
 conversation_memory = []
 forget_range = 30
@@ -53,6 +53,13 @@ def get_request(prompt: str, max_tokens: int, role: str):
 
 def speech_to_string(sensitivity_adjustment_duration: int):
 	global conversation_memory
+	
+	pygame.mixer.quit()
+	pygame.mixer.init()
+	pygame.mixer.music.load('ding.mp3')
+	pygame.mixer.music.play()
+	pygame.mixer.quit()
+	
 	audio_data = sr.AudioData(b"", 16000, 2)
 	with sr.Microphone() as source:
 		os.system('cls')
@@ -90,6 +97,12 @@ def speech_to_string(sensitivity_adjustment_duration: int):
 				conversation_memory.clear()
 				print("Memory Wiped!")
 				string_to_speech("Memory Wiped!")
+			elif "volumeset" in gpt_response.split():
+				pygame.mixer.quit()
+				pygame.mixer.init()
+				print(f"Volume set from {pygame.mixer.music.get_volume()} to {gpt_response.split()[2]}!")
+				pygame.mixer.music.set_volume(int(gpt_response.split()[2]) * .1)
+				pygame.mixer.quit()
 			else:
 				add_to_memory(gpt_response, string)
 			
