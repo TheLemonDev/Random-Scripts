@@ -52,14 +52,7 @@ def get_request(prompt: str, max_tokens: int, role: str):
 	return None
 
 def speech_to_string(sensitivity_adjustment_duration: int):
-	global conversation_memory
-	
-	pygame.mixer.quit()
-	pygame.mixer.init()
-	pygame.mixer.music.load('ding.mp3')
-	pygame.mixer.music.play()
-	pygame.mixer.quit()
-	
+	global conversation_memory	
 	audio_data = sr.AudioData(b"", 16000, 2)
 	with sr.Microphone() as source:
 		os.system('cls')
