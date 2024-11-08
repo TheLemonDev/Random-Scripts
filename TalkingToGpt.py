@@ -6,6 +6,7 @@ import dotenv
 import os
 import pygame
 import time
+import datetime
 
 dotenv.load_dotenv()
 recogniser = sr.Recognizer()
@@ -28,11 +29,13 @@ roles = (
     IF THE USER EXPLICITLY ASKS TO CLEAR YOUR MEMORY ONLY RESPOND WITH 'clearing memory' if they just mention memory and make no reference to clearing it just respond normaly
     IF THE USER EXPLICITLY ASKS TO CHANGE YOUR VOLUME ONLY RESPOND WITH ''volumeset' to (and the number they want to set it to in numerical form)' if the volume the user wants to set it to exceeds 10 or is lower than 0 say that you can't set the volume to that number
     Every prompt will also have a conversation history, it includes every prompt that has been given to you and every response you gave to said prompt.
+    You have a limit of 20 sentences to work with.
+    You also have a personality and must mimic feelings.
 	""",
 )
 
 conversation_memory = []
-forget_range = 30
+forget_range = 50
 
 def get_request(prompt: str, max_tokens: int, role: str):
 	try:
@@ -52,7 +55,7 @@ def get_request(prompt: str, max_tokens: int, role: str):
 	return None
 
 def speech_to_string(sensitivity_adjustment_duration: int):
-	global conversation_memory	
+	global conversation_memory
 	audio_data = sr.AudioData(b"", 16000, 2)
 	with sr.Microphone() as source:
 		os.system('cls')
@@ -81,7 +84,7 @@ def speech_to_string(sensitivity_adjustment_duration: int):
 			role = f"{role} + (PREVIOUS CONVERSATIONS): "
 			for i in conversation_memory:
 				role = f"{role} {i},"
-			gpt_response = get_request(prompt=string, max_tokens=1000, role=role)
+			gpt_response = get_request(prompt=f"{string}, current time: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", max_tokens=1000, role=role)
 			print(f"GPT RESPONSE: {gpt_response}")
 			string_to_speech(gpt_response)
 			if gpt_response == "press a key":
@@ -143,7 +146,7 @@ def change_keybind():
 
 def add_to_memory(gpt_response: str, prompt: str):
     global conversation_memory
-    conversation_memory.append(f"|User said: {prompt} and you responded with {gpt_response}|")
+    conversation_memory.append(f"|User said: {prompt} and you responded with {gpt_response} at the time {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}| ")
     if len(conversation_memory) > forget_range:
         conversation_memory.pop(0)
 
