@@ -11,6 +11,7 @@ recogniser = sr.Recognizer()
 listening = False
 listen_keybind = 'p'
 
+dotenv.load_dotenv()
 client = openai.OpenAI(
 	api_key=os.getenv("GPT_API_KEY")
 )
