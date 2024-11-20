@@ -9,8 +9,7 @@ client = openai.OpenAI(
 )
 
 role = """You are my helpful assistant, you will be given a document in the form of a string and must do the following:
-- Summarise the document including it's main points
-- If there are any questions on the document you must answer them and reference which question is being answered (ONLY IF THE INFORMATION IS OBJECTIVE AND NOT SOMETHING THAT ONLY THE HUMAN WOULD KNOW)
+- If there are any questions on the document you must answer them,
 - You are responding in a format that will be saved directly into a .txt file"""
 
 def doc_to_string(doc_file):
@@ -35,15 +34,18 @@ def get_request(prompt: str, max_tokens: int, role: str):
     return None
 
 def string_to_text_file(content, txt_file):
-    with open(txt_file, 'w', encoding='utf-8') as f:
-        f.write(content)
+    with open(txt_file, 'w', encoding='utf-8') as file:
+        file.write(content)
 
 def conversion_loop():
     print("*** DOCUMENT GPT ANALYSIS ***")
     print("(make sure your docx files are in the same location as this app)")
     print("(do not put .docx after your file names)")
     while True:
-        file_names = input("File Names (Write as file/file/file for multiple) > ")
+        file_names = input("File Names (Write as file/file/file for multiple): ")
         for name in file_names.split('/'):
             response = get_request(doc_to_string(f"{name}.docx"), 5000, role)
             string_to_text_file(response, f"{name}.txt")
+            print(f"{name}.docx completed!")
+            
+conversion_loop()

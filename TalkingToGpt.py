@@ -69,6 +69,7 @@ def speech_to_string(sensitivity_adjustment_duration: int):
 				segment = recogniser.listen(source=source, phrase_time_limit=1)
 				audio_data = sr.AudioData(audio_data.frame_data + segment.frame_data, segment.sample_rate, segment.sample_width)
 			else:
+				print(3)
 				break
 		
 		os.system('cls')
